@@ -73,34 +73,46 @@ bot.on('message', async message => {
         message.delete().catch();
         let text = message.content.substr(10);
         let args = text.split(',');
+        args.map(u => {
+            if (u.indexOf('(') === -1 || u.indexOf(')') === -1) {
+                message.reply('Todos los integrantes deben tener un nombre para identificar')
+                    .then(msg => msg.default({timeout: 5000}));
+            } else {
+                players.push(u.substr(0, u.indexOf('(')));
+                const lastKey = parseInt(Object.keys(realName)[Object.keys(realName).length - 1]) + 1;
+                realName[lastKey] = u.substring(u.lastIndexOf('(') + 1, u.lastIndexOf(')'));
+            }
+        });
         if (message.member.roles.cache.find(r => r.id === roleID)) {
-            players.push(args);
             message.reply('Se ha añadido nuevos usuario al challenge').then(msg => msg.delete({timeout: 2000}));
         } else {
             message.reply('No tienes permisos para usar este comando');
         }
     }
-    if (msg.startsWith(prefix + 'DELSOLOQ')) {
-        message.delete().catch();
-        let text = message.content.substr(10);
-        let args = text.split(',');
-        if (message.member.roles.cache.find(r => r.id === roleID)) {
-            args.map(nick => {
-                let index = players.indexOf(nick);
-                players.splice(index, 1);
-            });
-
-            message.reply('Se ha eliminado el/los usuario/s del challenge').then(msg => msg.delete({timeout: 2000}));
-        } else {
-            message.reply('No tienes permisos para usar este comando');
-        }
-    }
+    // if (msg.startsWith(prefix + 'DELSOLOQ')) {
+    //     message.delete().catch();
+    //
+    //     message.reply('ESTE COMANDO NO ESTÁ DISPONIBLE')
+    //         .then(msg => msg.delete({timeout: 50000}));
+    //     return ;
+    //     let text = message.content.substr(10);
+    //     let args = text.split(',');
+    //     if (message.member.roles.cache.find(r => r.id === roleID)) {
+    //         args.map(nick => {
+    //             let index = players.indexOf(nick);
+    //             players.splice(index, 1);
+    //         });
+    //
+    //         message.reply('Se ha eliminado el/los usuario/s del challenge').then(msg => msg.delete({timeout: 2000}));
+    //     } else {
+    //         message.reply('No tienes permisos para usar este comando');
+    //     }
+    // }
 });
 
 
 function sortSoloQRank(arrayOfAccounts) {
     _.map(arrayOfAccounts, (details) => {
-        // IRON
         const indexLeague = league.indexOf(details.tier.toLowerCase());
         const leaguePoints = rankLeague.indexOf(details.rank);
         const soloQPoints = LP[indexLeague] + leaguePoints + details.lps;

@@ -1,10 +1,10 @@
 const players = [
-    'spMarcia',
-    'ikcESGORville'
+    'ikcESGORville',
 ];
+
 const realName = {
-    spMarcia: 'jose luis',
-    ikcESGORville: 'Wasta'
+    0: 'Wasta',
 };
+
 module.exports.players = players;
 module.exports.realName = realName;
