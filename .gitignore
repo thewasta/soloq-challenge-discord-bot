@@ -1,0 +1,6 @@
+.idea
+images
+node_modules
+yarn.lock
+api-riot.iml
+.env
