@@ -82,8 +82,8 @@ bot.on('message', async message => {
     }
     if (msg.startsWith(prefix + 'DELSOLOQ')) {
         message.delete().catch();
-        let args = message.content.split(' ');
-        args.shift();
+        let text = message.content.substr(10);
+        let args = text.split(',');
         if (message.member.roles.cache.find(r => r.id === roleID)) {
             args.map(nick => {
                 let index = players.indexOf(nick);
