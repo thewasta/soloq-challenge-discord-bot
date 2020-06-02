@@ -1,4 +1,4 @@
-const {players} = require('./participants-players');
+const {players, realName} = require('./participants-players');
 const {league, LP, rankLeague} = require('./rank-stats');
 const _ = require('underscore');
 require('dotenv').config();
@@ -58,7 +58,7 @@ bot.on('message', async message => {
             .setColor('RANDOM')
             .setTitle('Estado actual del Challenge');
         sortedData.map((d, i) => {
-            embed.addField(`Puesto #${i + 1}`, `${d.user} ${d.tier} ${d.rank} ${d.lps}LP ${parseFloat((d.wins * 100) / (d.wins + d.losses)).toFixed(2)}% winrate`);
+            embed.addField(`Puesto #${i + 1} ${realName[players.indexOf(d.user)]}`, `${d.user} ${d.tier} ${d.rank} ${d.lps}LP ${parseFloat((d.wins * 100) / (d.wins + d.losses)).toFixed(2)}% winrate`);
         });
         message.channel.send(embed);
     }
