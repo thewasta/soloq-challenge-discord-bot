@@ -1,6 +1,6 @@
 const players = [
-    "quizas insulto",
+    // "quizas insulto",
     "jlac08",
-    "puedo insultar",
+    // "puedo insultar",
 ];
 module.exports.players = players;
