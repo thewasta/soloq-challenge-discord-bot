@@ -3,4 +3,5 @@ images
 node_modules
 yarn.lock
 api-riot.iml
+package-lock.json
 .env
