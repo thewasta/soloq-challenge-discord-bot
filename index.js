@@ -1,12 +1,13 @@
 const {players} = require('./participants-players');
 const {league, LP, rankLeague} = require('./rank-stats');
 const _ = require('underscore');
+require('dotenv').config();
+
 const channelID = process.env.CHANNEL_ID;
 const roleID = process.env.ROLE_ID;
 const {Client, MessageEmbed} = require('discord.js');
 const bot = new Client();
 
-require('dotenv').config();
 
 const prefix = '!';
 
