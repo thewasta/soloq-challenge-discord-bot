@@ -1,7 +1,8 @@
 const {players} = require('./participants-players');
 const {league, LP, rankLeague} = require('./rank-stats');
 const _ = require('underscore');
-
+const channelID = process.env.CHANNEL_ID;
+const roleID = process.env.ROLE_ID;
 const {Client, MessageEmbed} = require('discord.js');
 const bot = new Client();
 
@@ -31,7 +32,7 @@ async function fetchApi() {
 }
 
 bot.on('message', async message => {
-    if (message.channel.id !== '717355838024581221') return;
+    if (message.channel.id !== channelID) return;
     let msg = message.content.toUpperCase();
     if (msg.startsWith(prefix + 'RANK')) {
         message.delete().catch();
@@ -69,9 +70,9 @@ bot.on('message', async message => {
     }
     if (msg.startsWith(prefix + 'ADDSOLOQ')) {
         message.delete().catch();
-        let args = message.content.split(' ');
-        args.shift();
-        if (message.member.roles.cache.find(r => r.id === '717347913872965722')) {
+        let text = message.content.substr(10);
+        let args = text.split(',');
+        if (message.member.roles.cache.find(r => r.id === roleID)) {
             players.push(args);
             message.reply('Se ha añadido nuevos usuario al challenge').then(msg => msg.delete({timeout: 2000}));
         } else {
@@ -82,7 +83,7 @@ bot.on('message', async message => {
         message.delete().catch();
         let args = message.content.split(' ');
         args.shift();
-        if (message.member.roles.cache.find(r => r.id === '717347913872965722')) {
+        if (message.member.roles.cache.find(r => r.id === roleID)) {
             args.map(nick => {
                 let index = players.indexOf(nick);
                 players.splice(index, 1);
