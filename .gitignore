@@ -5,3 +5,5 @@ yarn.lock
 api-riot.iml
 package-lock.json
 .env
+logs-system.log
+player-soloq.txt

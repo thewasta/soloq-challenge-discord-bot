@@ -1,41 +1,60 @@
-const {players, realName} = require('./participants-players');
 const {league, LP, rankLeague} = require('./rank-stats');
 const _ = require('underscore');
 require('dotenv').config();
-
+const fs = require('fs');
+const date = new Date();
 const channelID = process.env.CHANNEL_ID;
 const roleID = process.env.ROLE_ID;
 const {Client, MessageEmbed} = require('discord.js');
 const bot = new Client();
 
-
 const prefix = '!';
-
 const axios = require('axios');
 
 bot.login(process.env.DISCORD_TOKEN);
 
 bot.on('ready', () => console.log('im ready'));
 
+
 async function fetchApi() {
-    const r = await Promise.all(players.map(async nickName => {
-        const summoner = await axios.get(`https://euw1.api.riotgames.com/lol/summoner/v4/summoners/by-name/${nickName}?api_key=${process.env.RIOT_API}`)
-            .then(r => {
-                return r.data;
-            });
-        return summoner.id;
+    const arrayOfPlayer = fs.readFileSync('player-soloq.txt', 'utf8').trim().split(',');
+    let nicksInGame = [];
+    arrayOfPlayer.map(player => {
+        const nickInGame = player.substr(0, player.indexOf('(')).trim();
+        nicksInGame.push(nickInGame);
+    });
+    const summonersID = await Promise.all(nicksInGame.map(async nickName => {
+        if (nickName.length !== 0) {
+            const summoner = await axios.get(`https://euw1.api.riotgames.com/lol/summoner/v4/summoners/by-name/${nickName}?api_key=${process.env.RIOT_API}`)
+                .then(response => {
+                    return response.data;
+                });
+            return summoner.id;
+        }
     }));
-    return await Promise.all(r.map(async summonerID => {
+
+    return await Promise.all(summonersID.map(async summonerID => {
             return await axios.get(`https://euw1.api.riotgames.com/lol/league/v4/entries/by-summoner/${summonerID}?api_key=${process.env.RIOT_API}`)
-                .then(r => r.data);
+                .then(response => response.data).catch(err => console.log('error en segundo fetch a la api de Riot'));
         })
     );
 }
 
 bot.on('message', async message => {
+    if (process.env.ENV === 'dev') message.delete({timeout: 3000}).catch();
     if (message.channel.id !== channelID) return;
     let msg = message.content.toUpperCase();
     if (msg.startsWith(prefix + 'RANK')) {
+        const arrayOfPlayer = fs.readFileSync('player-soloq.txt', 'utf8').trim().split(',');
+        let nicksInGame = [];
+        let IDsNameInPreview = [];
+        arrayOfPlayer.map(player => {
+            const nickInGame = player.substr(0, player.indexOf('(')).trim();
+            const IDNameInPreview = player.substring(player.indexOf('(') + 1, player.indexOf(')')).trim();
+            nicksInGame.push(nickInGame);
+            IDsNameInPreview.push(IDNameInPreview);
+        });
+        createFileToWrite('logs-system.log', formatDate(message.author, 'RANK'), true);
         message.delete().catch();
         const accountDetails = await fetchApi();
         let data = [];
@@ -57,23 +76,30 @@ bot.on('message', async message => {
         const embed = new MessageEmbed()
             .setColor('RANDOM')
             .setTitle('Estado actual del Challenge');
-        sortedData.map((d, i) => {
-            embed.addField(`Puesto #${i + 1} ${realName[players.indexOf(d.user)]}`, `${d.user} ${d.tier} ${d.rank} ${d.lps}LP ${parseFloat((d.wins * 100) / (d.wins + d.losses)).toFixed(2)}% winrate`);
+
+        sortedData.map((d, index) => {
+            embed.addField(`Puesto #${index + 1} ${IDsNameInPreview[nicksInGame.indexOf(d.user)]}`, `${d.user} ${d.tier} ${d.rank} ${d.lps}LP ${parseFloat((d.wins * 100) / (d.wins + d.losses)).toFixed(2)}% winrate`);
         });
         message.channel.send(embed);
     }
     if (msg.startsWith(prefix + 'PURGE')) {
+        createFileToWrite('logs-system.log', formatDate(message.author, 'PURGE'), true);
         message.delete().catch();
         if (!message.member.hasPermission('MANAGE_MESSAGES')) return message.reply('off');
         message.channel.bulkDelete(15).then(() => {
             message.reply(`Se han eliminado 15 mensajes`).then(msg => msg.delete({timeout: 5000}));
         }).catch(r => message.reply('Hay mensajes que no puedo eliminar. Solo pueden ser eliminados mensajes con antigüedad inferior a 14 días').then(msg => msg.delete({timeout: 2000})));
     }
+    if (!message.member.roles.cache.find(r => r.id === roleID)) return;
     if (msg.startsWith(prefix + 'ADDSOLOQ')) {
+        createFileToWrite('logs-system.log', formatDate(message.author, 'ADDSOLOQ'), true);
         message.delete().catch();
         let text = message.content.substr(10);
         let args = text.split(',');
-        args.map(u => {
+        args.map(playerInfo => {
+            createFileToWrite('player-soloq.txt', playerInfo);
+        });
+        /*args.map(u => {
             if (u.indexOf('(') === -1 || u.indexOf(')') === -1) {
                 message.reply('Todos los integrantes deben tener un nombre para identificar')
                     .then(msg => msg.default({timeout: 5000}));
@@ -87,7 +113,7 @@ bot.on('message', async message => {
             message.reply('Se ha añadido nuevos usuario al challenge').then(msg => msg.delete({timeout: 2000}));
         } else {
             message.reply('No tienes permisos para usar este comando');
-        }
+        }*/
     }
     // if (msg.startsWith(prefix + 'DELSOLOQ')) {
     //     message.delete().catch();
@@ -136,4 +162,30 @@ function dynamicSort(property, order) {
             return 0;
         }
     };
+}
+
+function createFileToWrite(file, content, logs) {
+    if (fs.existsSync(file)) {
+        if (logs) {
+            content = '\n' + content;
+        } else {
+            content = ',' + content;
+        }
+        fs.appendFileSync(file, content);
+    } else {
+        fs.writeFile(file, content, (err) => {
+            if (err) return console.log(err);
+        });
+    }
+}
+
+function formatDate(msg, command) {
+    const author = msg.username;
+    const H = date.getHours();
+    const M = date.getMinutes();
+    const S = date.getSeconds();
+    const MM = date.getMonth();
+    const YY = date.getUTCFullYear();
+    const DD = date.getUTCDay();
+    return `Command [${command}] sent by ${author} at ${H}:${M}:${S} ${YY}-${MM}-${DD}`;
 }
