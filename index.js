@@ -7,6 +7,8 @@ const channelID = process.env.CHANNEL_ID;
 const roleID = process.env.ROLE_ID;
 const {Client, MessageEmbed} = require('discord.js');
 const bot = new Client();
+const Sentry = require('@sentry/node');
+Sentry.init({dsn: process.env.SENTRY_DSN});
 
 const prefix = '!';
 const axios = require('axios');
