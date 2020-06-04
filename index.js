@@ -56,7 +56,7 @@ bot.on('message', async message => {
             nicksInGame.push(nickInGame);
             IDsNameInPreview.push(IDNameInPreview);
         });
-        createFileToWrite('logs-system.log', formatDate(message.author, 'RANK'), true);
+        createFileToWrite('logs-system.log', formatDate(message.author, 'RANK', message.content), true);
         message.delete().catch();
         const accountDetails = await fetchApi();
         let data = [];
@@ -85,7 +85,7 @@ bot.on('message', async message => {
         message.channel.send(embed);
     }
     if (msg.startsWith(prefix + 'PURGE')) {
-        createFileToWrite('logs-system.log', formatDate(message.author, 'PURGE'), true);
+        createFileToWrite('logs-system.log', formatDate(message.author, 'PURGE', message.content), true);
         message.delete().catch();
         if (!message.member.hasPermission('MANAGE_MESSAGES')) return message.reply('off');
         message.channel.bulkDelete(15).then(() => {
@@ -94,12 +94,17 @@ bot.on('message', async message => {
     }
     if (!message.member.roles.cache.find(r => r.id === roleID)) return;
     if (msg.startsWith(prefix + 'ADDSOLOQ')) {
-        createFileToWrite('logs-system.log', formatDate(message.author, 'ADDSOLOQ'), true);
+        createFileToWrite('logs-system.log', formatDate(message.author, 'ADDSOLOQ', message.content), true);
         message.delete().catch();
         let text = message.content.substr(10);
         let args = text.split(',');
         args.map(playerInfo => {
+            if (playerInfo.indexOf('(') === -1 || playerInfo.indexOf(')') === -1) {
+                message.reply(`Todos los usuarios deben tener un nick para ser Identificados`);
+                return;
+            }
             createFileToWrite('player-soloq.txt', playerInfo);
+            message.reply(`Se ha añadido al Challenge a: ${playerInfo}`)
         });
         /*args.map(u => {
             if (u.indexOf('(') === -1 || u.indexOf(')') === -1) {
@@ -181,7 +186,7 @@ function createFileToWrite(file, content, logs) {
     }
 }
 
-function formatDate(msg, command) {
+function formatDate(msg, command, content) {
     const author = msg.username;
     const H = date.getHours();
     const M = date.getMinutes();
@@ -189,5 +194,5 @@ function formatDate(msg, command) {
     const MM = date.getMonth();
     const YY = date.getUTCFullYear();
     const DD = date.getUTCDay();
-    return `Command [${command}] sent by ${author} at ${H}:${M}:${S} ${YY}-${MM}-${DD}`;
+    return `Command [${command}] with message [${content}] sent by ${author} at ${H}:${M}:${S} ${YY}-${MM}-${DD}`;
 }
