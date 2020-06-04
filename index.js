@@ -1,4 +1,4 @@
-const {league, LP, rankLeague} = require('./rank-stats');
+const {league, LP, rankLeague, leaguePeaks} = require('./rank-stats');
 const _ = require('underscore');
 require('dotenv').config();
 const fs = require('fs');
@@ -19,7 +19,7 @@ bot.on('ready', () => console.log('im ready'));
 
 
 async function fetchApi() {
-    const arrayOfPlayer = fs.readFileSync('player-soloq.txt', 'utf8').trim().split(',');
+    const arrayOfPlayer = fs.readFileSync('player-soloq.txt', 'utf8').replace(/\s/g, '').split(',');
     let nicksInGame = [];
     arrayOfPlayer.map(player => {
         const nickInGame = player.substr(0, player.indexOf('(')).trim();
@@ -104,7 +104,7 @@ bot.on('message', async message => {
                 return;
             }
             createFileToWrite('player-soloq.txt', playerInfo);
-            message.reply(`Se ha añadido al Challenge a: ${playerInfo}`)
+            message.reply(`Se ha añadido al Challenge a: ${playerInfo}`);
         });
         /*args.map(u => {
             if (u.indexOf('(') === -1 || u.indexOf(')') === -1) {
@@ -148,7 +148,7 @@ function sortSoloQRank(arrayOfAccounts) {
     _.map(arrayOfAccounts, (details) => {
         const indexLeague = league.indexOf(details.tier.toLowerCase());
         const leaguePoints = rankLeague.indexOf(details.rank);
-        const soloQPoints = LP[indexLeague] + (leaguePoints + 100) + details.lps;
+        const soloQPoints = LP[indexLeague] + leaguePeaks[leaguePoints] + details.lps;
         _.extend(details, {soloQ: soloQPoints});
     });
 
