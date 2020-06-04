@@ -148,7 +148,7 @@ function sortSoloQRank(arrayOfAccounts) {
     _.map(arrayOfAccounts, (details) => {
         const indexLeague = league.indexOf(details.tier.toLowerCase());
         const leaguePoints = rankLeague.indexOf(details.rank);
-        const soloQPoints = LP[indexLeague] + leaguePoints + details.lps;
+        const soloQPoints = LP[indexLeague] + (leaguePoints + 100) + details.lps;
         _.extend(details, {soloQ: soloQPoints});
     });
 
