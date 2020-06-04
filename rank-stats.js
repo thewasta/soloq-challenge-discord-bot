@@ -1,4 +1,4 @@
-const league = ['iron', 'bronce', 'silver', 'gold', 'platinum', 'diamond'];
+const league = ['iron', 'bronze', 'silver', 'gold', 'platinum', 'diamond'];
 
 const LP = {
     0: 1200,
