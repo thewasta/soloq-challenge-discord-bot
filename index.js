@@ -19,6 +19,9 @@ bot.on('ready', () => console.log('im ready'));
 
 
 async function fetchApi() {
+    const headers = {
+        'Content-Type': 'application/json'
+    };
     const arrayOfPlayer = fs.readFileSync('player-soloq.txt', 'utf8').replace(/\s/g, '').split(',');
     let nicksInGame = [];
     arrayOfPlayer.map(player => {
@@ -27,7 +30,7 @@ async function fetchApi() {
     });
     const summonersID = await Promise.all(nicksInGame.map(async nickName => {
         if (nickName.length !== 0) {
-            const summoner = await axios.get(`https://euw1.api.riotgames.com/lol/summoner/v4/summoners/by-name/${nickName}?api_key=${process.env.RIOT_API}`)
+            const summoner = await axios.get(`https://euw1.api.riotgames.com/lol/summoner/v4/summoners/by-name/${nickName}?api_key=${process.env.RIOT_API}`, {headers})
                 .then(response => {
                     return response.data;
                 });
