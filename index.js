@@ -81,7 +81,6 @@ bot.on('message', async message => {
         const embed = new MessageEmbed()
             .setColor('RANDOM')
             .setTitle('Estado actual del Challenge');
-
         sortedData.map((d, index) => {
             embed.addField(`Puesto #${index + 1} ${IDsNameInPreview[nicksInGame.indexOf(encodeURI(d.user))]}`, `${d.user} ${d.tier} ${d.rank} ${d.lps}LP ${parseFloat((d.wins * 100) / (d.wins + d.losses)).toFixed(2)}% winrate`);
         });
