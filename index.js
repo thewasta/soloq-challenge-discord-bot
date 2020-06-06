@@ -106,8 +106,8 @@ bot.on('message', async message => {
                 message.reply(`Todos los usuarios deben tener un nick para ser Identificados`);
                 return;
             }
-            playerInfo = encodeURI(playerInfo);
             createFileToWrite('player-soloq.txt', playerInfo);
+            playerInfo = encodeURI(playerInfo);
             message.reply(`Se ha añadido al Challenge a: ${playerInfo}`);
         });
         /*args.map(u => {
