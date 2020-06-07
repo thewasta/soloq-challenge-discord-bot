@@ -82,6 +82,7 @@ bot.on('message', async message => {
             });
         });
         const sortedData = sortSoloQRank(data);
+
         const embed = new MessageEmbed()
             .setColor('RANDOM')
             .setTitle('Estado actual del Challenge');
