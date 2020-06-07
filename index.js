@@ -17,6 +17,9 @@ bot.login(process.env.DISCORD_TOKEN);
 
 bot.on('ready', () => console.log('im ready'));
 
+function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
 
 async function fetchApi() {
     const headers = {
@@ -39,7 +42,8 @@ async function fetchApi() {
     }));
 
     return await Promise.all(summonersID.map(async summonerID => {
-            return await axios.get(`https://euw1.api.riotgames.com/lol/league/v4/entries/by-summoner/${summonerID}?api_key=${process.env.RIOT_API}`)
+        await sleep(3000);
+        return await axios.get(`https://euw1.api.riotgames.com/lol/league/v4/entries/by-summoner/${summonerID}?api_key=${process.env.RIOT_API}`)
                 .then(response => response.data).catch(err => console.log('error en segundo fetch a la api de Riot'));
         })
     );
