@@ -42,9 +42,9 @@ async function fetchApi() {
     }));
 
     return await Promise.all(summonersID.map(async summonerID => {
-        await sleep(3000);
-        return await axios.get(`https://euw1.api.riotgames.com/lol/league/v4/entries/by-summoner/${summonerID}?api_key=${process.env.RIOT_API}`)
-                .then(response => response.data).catch(err => console.log('error en segundo fetch a la api de Riot'));
+            await sleep(3000);
+            return await axios.get(`https://euw1.api.riotgames.com/lol/league/v4/entries/by-summoner/${summonerID}?api_key=${process.env.RIOT_API}`)
+                .then(response => response.data).catch(err => console.log('error en segundo fetch a la api de Riot', err));
         })
     );
 }
@@ -86,7 +86,7 @@ bot.on('message', async message => {
             .setColor('RANDOM')
             .setTitle('Estado actual del Challenge');
         sortedData.map((d, index) => {
-            embed.addField(`Puesto #${index + 1} ${IDsNameInPreview[nicksInGame.indexOf(encodeURI(d.user))]}`, `${d.user} ${d.tier} ${d.rank} ${d.lps}LP ${parseFloat((d.wins * 100) / (d.wins + d.losses)).toFixed(2)}% winrate`);
+            embed.addField(`Puesto #${index + 1} ${IDsNameInPreview[nicksInGame.indexOf(encodeURI(d.user))]}`, `${d.user} ${d.tier} ${d.rank} ${d.lps}LP ${parseFloat((d.wins * 100) / (d.wins + d.losses)).toFixed(2)}% winrate -- ${d.wins + d.losses} partidas`);
         });
         message.channel.send(embed);
     }
